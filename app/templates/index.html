@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="hero"><h1>Jouw prijsalerts</h1><p>Voeg een productpagina toe. De monitor controleert dagelijks de prijs en mailt zodra die onder jouw grens komt.</p></section>
+<div class="grid">
+<section class="card"><h2>Product toevoegen</h2><form method="post" action="/products">
+<label>Product-URL<input type="url" name="url" required placeholder="https://webshop.nl/product"></label>
+<label>Naam <small>(optioneel; wordt automatisch opgehaald)</small><input name="name"></label>
+<label>Waarschuw onder (€)<input name="target_price" inputmode="decimal" placeholder="140,00"></label>
+<label>Afwijkend e-mailadres <small>(optioneel)</small><input type="email" name="recipient_email" placeholder="Anders centraal adres"></label>
+<button>Toevoegen en nu controleren</button></form></section>
+<section class="card"><h2>Centrale instellingen</h2><form method="post" action="/settings">
+<label>Standaard ontvanger<input type="email" name="default_email" value="{{ settings.default_email or '' }}" placeholder="jij@example.nl"></label>
+<button>Opslaan</button></form><p class="muted">Een e-mailadres bij een product heeft voorrang op dit centrale adres.</p></section>
+</div>
+<section><h2>Gevolgde producten</h2>{% if products %}<div class="products">
+{% for p in products %}<a class="product" href="/products/{{ p.id }}">
+<div><strong>{{ p.name }}</strong><small>{{ p.url.split('/')[2] }}</small></div>
+<div class="price">{% if p.current_cents is not none %}€ {{ '%.2f'|format(p.current_cents / 100)|replace('.', ',') }}{% else %}—{% endif %}<small>{% if p.target_cents %}grens € {{ '%.2f'|format(p.target_cents / 100)|replace('.', ',') }}{% else %}geen grens{% endif %}</small></div>
+<span class="status {{ 'ok' if not p.last_error else 'error' }}">{{ 'actief' if p.active else 'uit' }}</span></a>{% endfor %}
+</div>{% else %}<div class="empty">Nog geen producten toegevoegd.</div>{% endif %}</section>
+{% endblock %}

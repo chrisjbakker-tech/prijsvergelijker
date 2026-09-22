@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block title %}{{ product.name }} · Prijsmonitor{% endblock %}
+{% block content %}
+<a class="back" href="/">← Overzicht</a>
+<section class="product-head"><div><h1>{{ product.name }}</h1><a href="{{ product.url }}" target="_blank" rel="noopener">Open productpagina ↗</a></div><div class="big-price">{% if product.current_cents is not none %}€ {{ '%.2f'|format(product.current_cents / 100)|replace('.', ',') }}{% else %}Nog onbekend{% endif %}</div></section>
+{% if product.last_error %}<div class="alert">{{ product.last_error }}</div>{% endif %}
+<div class="grid"><section class="card"><h2>Instellingen</h2><form method="post">
+<label>Naam<input name="name" value="{{ product.name }}" required></label>
+<label>Waarschuw onder (€)<input name="target_price" value="{% if product.target_cents is not none %}{{ '%.2f'|format(product.target_cents / 100)|replace('.', ',') }}{% endif %}"></label>
+<label>Afwijkende ontvanger<input type="email" name="recipient_email" value="{{ product.recipient_email or '' }}" placeholder="Centraal: {{ settings.default_email or 'niet ingesteld' }}"></label>
+<label class="check"><input type="checkbox" name="active" {% if product.active %}checked{% endif %}> Dagelijks controleren</label><button>Wijzigingen opslaan</button></form>
+<form method="post" action="/products/{{ product.id }}/check"><button class="secondary">Nu controleren</button></form>
+<form method="post" action="/products/{{ product.id }}/delete" onsubmit="return confirm('Product verwijderen?')"><button class="danger">Verwijderen</button></form></section>
+<section class="card"><h2>Prijshistorie</h2>{% if history %}<table><thead><tr><th>Moment (UTC)</th><th>Prijs</th></tr></thead><tbody>{% for row in history %}<tr><td>{{ row.checked_at.strftime('%d-%m-%Y %H:%M') }}</td><td>€ {{ '%.2f'|format(row.price_cents / 100)|replace('.', ',') }}</td></tr>{% endfor %}</tbody></table>{% else %}<p class="muted">Nog geen prijsmetingen.</p>{% endif %}</section></div>
+{% endblock %}
